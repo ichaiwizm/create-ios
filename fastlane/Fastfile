@@ -16,6 +16,10 @@ end
 platform :ios do
   desc "Build + upload TestFlight"
   lane :beta do
+    # Crée un keychain CI dédié et le déverrouille : évite le hang de codesign
+    # (qui attend sinon un prompt keychain jamais affiché en CI headless).
+    setup_ci(force: true)
+
     api_key = asc_api_key
 
     # Le numéro de build est injecté DANS le projet par XcodeGen au moment du
