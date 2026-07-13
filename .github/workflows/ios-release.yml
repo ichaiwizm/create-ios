@@ -16,7 +16,7 @@ on:
 jobs:
   build:
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       # Numéro de build monotone injecté dans le projet par XcodeGen
       # (project.yml : CURRENT_PROJECT_VERSION = ${BUILD_NUMBER}).
