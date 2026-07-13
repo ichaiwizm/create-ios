@@ -73,7 +73,7 @@ struct LightboxView: View {
                 Spacer(minLength: 0)
                 LightboxActions(generation: generation, onDismiss: close)
             }
-            .opacity(appeared ? (1 - dismissProgress * 0.6) : 0)
+            .opacity(appeared ? (1 - Double(dismissProgress) * 0.6) : 0)
         }
         // Toasts émis depuis la lightbox (copie, sauvegarde, outils) : posés ici pour
         // s'afficher AU-DESSUS du fullScreenCover (le Toast racine est masqué par le cover).
