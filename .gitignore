@@ -1,0 +1,35 @@
+# Xcode project généré par XcodeGen (jamais commité — régénéré via `xcodegen generate`)
+*.xcodeproj/
+*.xcworkspace/
+
+# Build / dérivés
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods (si un jour ajouté)
+Pods/
+
+# Xcode user data
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+*.mobileprovision
+*.p8
+*.p12
+*.cer
+
+# Divers
+.DS_Store

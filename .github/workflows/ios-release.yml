@@ -1,0 +1,69 @@
+name: iOS Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: "Lane fastlane (beta = TestFlight, release = App Store)"
+        required: true
+        default: "beta"
+        type: choice
+        options: [beta, release]
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 45
+    env:
+      # Numéro de build monotone injecté dans le projet par XcodeGen
+      # (project.yml : CURRENT_PROJECT_VERSION = ${BUILD_NUMBER}).
+      BUILD_NUMBER: ${{ github.run_number }}
+      # Team ID Apple Developer injecté dans le projet (DEVELOPMENT_TEAM = ${TEAM_ID}).
+      TEAM_ID: ${{ secrets.TEAM_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Générer le projet Xcode (XcodeGen)
+        # Le .xcodeproj n'est PAS commité : XcodeGen le régénère à chaque run à partir de
+        # project.yml, en substituant ${BUILD_NUMBER} et ${TEAM_ID} depuis l'environnement.
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          test -d Create.xcodeproj || { echo "::error::Create.xcodeproj non généré"; exit 1; }
+
+      - name: Configurer la clé SSH pour fastlane match
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MATCH_DEPLOY_KEY }}" > ~/.ssh/match_key
+          chmod 600 ~/.ssh/match_key
+          cat >> ~/.ssh/config <<EOF
+          Host github.com
+            IdentityFile ~/.ssh/match_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking accept-new
+          EOF
+
+      - name: Lancer fastlane
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          LANE="${{ github.event.inputs.lane }}"
+          if [ -z "$LANE" ]; then LANE="beta"; fi
+          bundle exec fastlane ios "$LANE"
