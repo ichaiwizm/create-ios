@@ -24,10 +24,24 @@ platform :ios do
 
     match(type: "appstore", api_key: api_key, readonly: false)
 
+    # Signature manuelle : câbler le profil match dans le projet généré (sinon
+    # "requires a provisioning profile" à l'archive).
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "#{SCHEME}.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      code_sign_identity: "Apple Distribution",
+      bundle_identifier: APP_IDENTIFIER,
+      profile_name: "match AppStore #{APP_IDENTIFIER}"
+    )
+
     build_app(
       scheme: SCHEME,
       export_method: "app-store",
-      export_options: { signingStyle: "manual" }
+      export_options: {
+        signingStyle: "manual",
+        provisioningProfiles: { APP_IDENTIFIER => "match AppStore #{APP_IDENTIFIER}" }
+      }
     )
 
     upload_to_testflight(
