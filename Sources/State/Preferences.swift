@@ -21,6 +21,11 @@ enum PrefKey {
 ///
 /// On lit/écrit `UserDefaults.standard`, qui est exactement le magasin adossé à
 /// `@AppStorage` : les vues qui utilisent `@AppStorage(PrefKey.*)` restent cohérentes.
+///
+/// Isolé `@MainActor` : `restore`/`persist` accèdent aux propriétés de `ComposerState`
+/// (lui-même `@MainActor`). Les deux appelants (`ComposerState.send`/`selectFamily` et le
+/// démarrage de l'app) sont déjà sur le main actor.
+@MainActor
 struct Preferences {
 
     /// Restaure les derniers choix dans le composer (au démarrage).

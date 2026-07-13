@@ -9,7 +9,11 @@ import Foundation
 enum TimeAgo {
 
     /// Formateur partagé, configuré une seule fois (locale FR, unités courtes, style numérique).
-    private static let formatter: RelativeDateTimeFormatter = {
+    ///
+    /// `RelativeDateTimeFormatter` n'est pas `Sendable` : sous le mode Swift 6 un `static let`
+    /// de ce type serait rejeté. On l'annote `nonisolated(unsafe)` — sûr en pratique car
+    /// `string(from:)` est appelé pendant le rendu SwiftUI (fil principal), jamais en concurrence.
+    nonisolated(unsafe) private static let formatter: RelativeDateTimeFormatter = {
         let f = RelativeDateTimeFormatter()
         f.locale = Locale(identifier: "fr_FR")
         f.unitsStyle = .short          // « il y a 2 min », « il y a 3 h »

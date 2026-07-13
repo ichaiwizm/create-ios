@@ -14,6 +14,11 @@ enum Haptic {
 
 /// Façade haptique. **Un seul point d'entrée** — au plus 1 haptique par action utilisateur.
 /// Les générateurs no-op si l'utilisateur a désactivé le retour haptique au niveau système.
+///
+/// Isolé `@MainActor` : les `UI*FeedbackGenerator` d'UIKit sont eux-mêmes `@MainActor`
+/// (init + `prepare`/`*Occurred`). Tous les appelants (bodies SwiftUI, stores `@MainActor`)
+/// sont déjà sur le main actor.
+@MainActor
 enum Haptics {
 
     /// Déclenche le retour haptique associé.

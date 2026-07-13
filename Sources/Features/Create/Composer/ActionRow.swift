@@ -177,8 +177,9 @@ struct ActionRow: View {
 
     private func generate() {
         guard canGenerate else { return }
+        // Pré-arme seulement : l'unique haptique `.launch` est déclenchée par
+        // `ComposerState.send(using:)` (CONTRACTS §2.8 — 1 haptique par action).
         Haptics.prepare(.launch)
-        Haptics.fire(.launch)
         submitting = true
         Task {
             do {
