@@ -68,7 +68,7 @@ struct Toast: View {
         VStack {
             if let item = center.current {
                 capsule(item)
-                    .transition(.move(edge: .top).combined(with: .scale(scale: 0.9)).combined(with: .opacity))
+                    .transition(Self.entrance)
                     .id(item.id)
             }
             Spacer(minLength: 0)
@@ -79,7 +79,21 @@ struct Toast: View {
         .allowsHitTesting(false)
     }
 
+    // MARK: - Transition (typée pour soulager l'inférence du ViewBuilder)
+
+    /// Entrée « toast-in » : glissement depuis le haut + léger scale + fondu.
+    /// Type explicite `AnyTransition` : évite que le type-checker résolve toute la
+    /// chaîne `.combined(with:)` à l'intérieur du `body` (coût combinatoire).
+    private static let entrance: AnyTransition = .move(edge: .top)
+        .combined(with: .scale(scale: 0.9))
+        .combined(with: .opacity)
+
     // MARK: - Capsule
+
+    /// Ombre portée de la capsule (constante typée — sort les littéraux du `body`).
+    private static let shadowColor: Color = Color(hex: 0x19202E, alpha: 0.14)
+    private static let shadowRadius: CGFloat = 18
+    private static let shadowOffsetY: CGFloat = 8
 
     private func capsule(_ item: Item) -> some View {
         HStack(spacing: 8) {
@@ -93,7 +107,7 @@ struct Toast: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 11)
         .glassSurface(.strong, radius: 22)
-        .shadow(color: Color(hex: 0x19202E, alpha: 0.14), radius: 18, y: 8)
+        .shadow(color: Self.shadowColor, radius: Self.shadowRadius, y: Self.shadowOffsetY)
         .padding(.horizontal, 24)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(item.message)

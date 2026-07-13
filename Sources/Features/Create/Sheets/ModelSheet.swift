@@ -61,17 +61,20 @@ struct ModelSheet: View {
                 .foregroundStyle(active ? Color.ink : Color.inkSoft)
                 .frame(maxWidth: .infinity)
                 .frame(height: 36)
-                .background(
-                    Group {
-                        if active {
-                            Capsule(style: .continuous)
-                                .fill(Color.white)
-                                .shadow(color: Color(hex: 0x19202E, alpha: 0.12), radius: 6, y: 2)
-                        }
-                    }
-                )
+                .background(segmentHighlight(active: active))
         }
         .buttonStyle(PressStyle())
+    }
+
+    // Pastille blanche de l'onglet actif, extraite du `body` du bouton :
+    // sort la conditionnelle + shadow + `Color(hex:alpha:)` de la chaîne de modifiers.
+    @ViewBuilder
+    private func segmentHighlight(active: Bool) -> some View {
+        if active {
+            Capsule(style: .continuous)
+                .fill(Color.white)
+                .shadow(color: Color(hex: 0x19202E, alpha: 0.12), radius: 6, y: 2)
+        }
     }
 
     // MARK: - Ligne famille

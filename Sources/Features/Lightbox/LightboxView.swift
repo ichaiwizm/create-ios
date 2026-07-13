@@ -40,30 +40,64 @@ struct LightboxView: View {
     // Lecture vidéo
     @State private var player: AVPlayer?
 
-    private var effectiveScale: CGFloat { max(1, committedScale * pinch) }
+    private var effectiveScale: CGFloat {
+        let zoomed: CGFloat = committedScale * pinch
+        return max(1, zoomed)
+    }
 
     /// Progression de fermeture (0 → 1) pour dé-opacifier le fond pendant le swipe.
     private var dismissProgress: CGFloat {
         guard effectiveScale <= 1.01 else { return 0 }
-        return min(1, max(0, dragOffset.height) / 300)
+        let travel: CGFloat = max(0, dragOffset.height)
+        return min(1, travel / 300)
     }
 
     private var mediaOffset: CGSize {
-        CGSize(width: committedPan.width + livePan.width + dragOffset.width,
-               height: committedPan.height + livePan.height + dragOffset.height)
+        let w: CGFloat = committedPan.width + livePan.width + dragOffset.width
+        let h: CGFloat = committedPan.height + livePan.height + dragOffset.height
+        return CGSize(width: w, height: h)
+    }
+
+    // MARK: - Valeurs dérivées d'animation (types explicites)
+    //
+    // Chaque modifier ci-dessous consomme une valeur PRÉ-CALCULÉE et explicitement
+    // typée. Sans cela, l'inférence SwiftUI mélange `CGFloat` (effectiveScale,
+    // dismissProgress) et littéraux non typés à l'intérieur des ternaires de
+    // `.scaleEffect`/`.opacity`, ce qui déclenche le pont CGFloat↔Double implicite
+    // et fait exploser le type-checker (compilation >30 min).
+
+    /// Opacité du fond assombri (dé-opacifié pendant le swipe de fermeture).
+    private var backdropOpacity: Double {
+        guard appeared else { return 0 }
+        return 1 - Double(dismissProgress)
+    }
+
+    /// Échelle du média : zoom courant × facteur d'entrée/sortie (scale-in 0.94→1).
+    private var mediaScale: CGFloat {
+        let entrance: CGFloat = appeared ? (1 - dismissProgress * 0.12) : 0.94
+        return effectiveScale * entrance
+    }
+
+    /// Opacité du média (visible une fois entré).
+    private var mediaOpacity: Double { appeared ? 1 : 0 }
+
+    /// Opacité de la chrome (barre haute + panneau d'actions) pendant le swipe.
+    private var chromeOpacity: Double {
+        guard appeared else { return 0 }
+        return 1 - Double(dismissProgress) * 0.6
     }
 
     var body: some View {
         ZStack {
             backdrop
                 .ignoresSafeArea()
-                .opacity(appeared ? (1 - dismissProgress) : 0)
+                .opacity(backdropOpacity)
                 .onTapGesture { if effectiveScale > 1.01 { resetZoom() } }
 
             media
-                .scaleEffect(effectiveScale * (appeared ? (1 - dismissProgress * 0.12) : 0.94))
+                .scaleEffect(mediaScale)
                 .offset(mediaOffset)
-                .opacity(appeared ? 1 : 0)
+                .opacity(mediaOpacity)
                 .matchedGeometry(id: generation.id, in: namespace)
                 .gesture(dismissDrag)
                 .gesture(magnify)
@@ -73,7 +107,7 @@ struct LightboxView: View {
                 Spacer(minLength: 0)
                 LightboxActions(generation: generation, onDismiss: close)
             }
-            .opacity(appeared ? (1 - Double(dismissProgress) * 0.6) : 0)
+            .opacity(chromeOpacity)
         }
         // Toasts émis depuis la lightbox (copie, sauvegarde, outils) : posés ici pour
         // s'afficher AU-DESSUS du fullScreenCover (le Toast racine est masqué par le cover).
@@ -193,7 +227,8 @@ struct LightboxView: View {
                     livePan = value.translation           // pan quand zoomé
                 } else {
                     // swipe de fermeture : n'autorise pas de remontée franche
-                    dragOffset = CGSize(width: value.translation.width * 0.4,
+                    let dampedWidth: CGFloat = value.translation.width * 0.4
+                    dragOffset = CGSize(width: dampedWidth,
                                         height: value.translation.height)
                 }
             }

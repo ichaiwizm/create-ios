@@ -63,7 +63,7 @@ struct ActionRow: View {
                 .glassSurface(.glass, radius: 20)
         }
         .disabled(photoLimitReached || composer.uploading)
-        .opacity(photoLimitReached ? 0.4 : 1)
+        .opacity(photoLimitReached ? 0.4 : 1.0)
         .accessibilityLabel("Ajouter une image de référence")
     }
 

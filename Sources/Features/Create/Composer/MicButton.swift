@@ -17,27 +17,11 @@ struct MicButton: View {
 
     var body: some View {
         Button(action: toggle) {
-            ZStack {
-                // Halo rouge qui se dilate en boucle (mic-pulse).
-                if isRecording {
-                    Circle()
-                        .stroke(Color.danger, lineWidth: 2)
-                        .frame(width: 40, height: 40)
-                        .scaleEffect(pulse ? 1.6 : 1.0)
-                        .opacity(pulse ? 0.0 : 0.45)
-                }
-
-                Image(systemName: "mic.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(isRecording ? Color.white : Color.ink)
-                    .frame(width: 40, height: 40)
-                    .background(micBackground)
-            }
-            .frame(width: 40, height: 40)
+            micLabel
         }
         .buttonStyle(PressStyle())
         .disabled(transcribing)
-        .opacity(transcribing ? 0.5 : 1)
+        .opacity(transcribing ? 0.5 : 1.0)
         .accessibilityLabel(isRecording ? "Arrêter la dictée" : "Dicter")
         .onChange(of: isRecording) { _, recording in
             guard !reduceMotion else { return }
@@ -53,6 +37,34 @@ struct MicButton: View {
         .onDisappear {
             autoStop?.cancel()
             if isRecording { _ = recorder.stop() }
+        }
+    }
+
+    // Label du bouton extrait du `body` : isole le ZStack (halo conditionnel +
+    // glyphe + fond) des 6 modifiers du bouton, ce qui borne le travail du
+    // type-checker sur l'expression du `body`.
+    @ViewBuilder
+    private var micLabel: some View {
+        ZStack {
+            recordingHalo
+            Image(systemName: "mic.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(isRecording ? Color.white : Color.ink)
+                .frame(width: 40, height: 40)
+                .background(micBackground)
+        }
+        .frame(width: 40, height: 40)
+    }
+
+    // Halo rouge qui se dilate en boucle (mic-pulse).
+    @ViewBuilder
+    private var recordingHalo: some View {
+        if isRecording {
+            Circle()
+                .stroke(Color.danger, lineWidth: 2)
+                .frame(width: 40, height: 40)
+                .scaleEffect(pulse ? 1.6 : 1.0)
+                .opacity(pulse ? 0.0 : 0.45)
         }
     }
 

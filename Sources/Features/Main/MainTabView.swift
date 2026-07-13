@@ -74,7 +74,11 @@ struct MainTabView: View {
     }
 
     private func tabItem(_ tab: AppTab) -> some View {
-        let isActive = selection == tab
+        let isActive: Bool = selection == tab
+        // Type explicite : le littéral `[]` du ternaire ci-dessous force sinon la
+        // résolution de `ExpressibleByArrayLiteral` sur `AccessibilityTraits`
+        // (OptionSet) à l'inférence. Pré-calculé et typé = résolution immédiate.
+        let selectedTraits: AccessibilityTraits = isActive ? .isSelected : []
         return Button {
             guard selection != tab else { return }
             Haptics.fire(.select)
@@ -103,6 +107,6 @@ struct MainTabView: View {
         }
         .buttonStyle(PressStyle())
         .accessibilityLabel(tab.label)
-        .accessibilityAddTraits(isActive ? .isSelected : [])
+        .accessibilityAddTraits(selectedTraits)
     }
 }

@@ -37,7 +37,14 @@ struct GalleryCard: View {
         .glassSurface(.card, radius: 22)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityText)
-        .accessibilityAddTraits(isTappable ? .isButton : [])
+        .accessibilityAddTraits(tapTraits)
+    }
+
+    /// Extrait du modifier : le littéral `[]` dans un ternaire force le vérificateur
+    /// à résoudre `ExpressibleByArrayLiteral` sur `AccessibilityTraits` (OptionSet)
+    /// à l'inférence. Type explicite = résolution immédiate.
+    private var tapTraits: AccessibilityTraits {
+        isTappable ? .isButton : []
     }
 
     private func open() {
@@ -185,11 +192,15 @@ struct GalleryCard: View {
 
     /// Résout un slug kie (`veo3_fast`, `nano-banana-pro`…) vers le nom de famille lisible.
     private func modelName(for slug: String) -> String {
-        for family in ModelCatalog.image + ModelCatalog.video {
+        // Concaténation hissée + typée : évite de résoudre la surcharge de `+`
+        // sur `[ModelFamily]` (et la closure de `contains`) à l'inférence.
+        let families: [ModelFamily] = ModelCatalog.image + ModelCatalog.video
+        for family in families {
             if family.key == slug || family.textId == slug || family.editId == slug {
                 return family.name
             }
-            if let variants = family.variants, variants.contains(where: { $0.id == slug }) {
+            if let variants: [ModelVariant] = family.variants,
+               variants.contains(where: { (variant: ModelVariant) -> Bool in variant.id == slug }) {
                 return family.name
             }
         }

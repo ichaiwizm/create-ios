@@ -88,19 +88,23 @@ struct LoginView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             // « Create. » — point en accent bleu.
-            (
-                Text("Create")
-                    .foregroundStyle(Color.ink)
-                + Text(".")
-                    .foregroundStyle(Color.accent)
-            )
-            .font(Font2.display(30))
+            titleText
+                .font(Font2.display(30))
 
             Text("Connecte-toi pour créer.")
                 .font(Font2.ui(15))
                 .foregroundStyle(Color.inkSoft)
         }
         .accessibilityElement(children: .combine)
+    }
+
+    /// Titre « Create. » extrait en `Text` typé. Les fragments sont hissés et
+    /// annotés `: Text` pour forcer la surcharge `Text.foregroundStyle` (retour
+    /// `Text`) et éviter que l'opérateur `+` fasse exploser l'inférence de types.
+    private var titleText: Text {
+        let name: Text = Text("Create").foregroundStyle(Color.ink)
+        let dot: Text = Text(".").foregroundStyle(Color.accent)
+        return name + dot
     }
 
     // MARK: - Champs

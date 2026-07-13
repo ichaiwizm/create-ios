@@ -12,7 +12,9 @@ struct GalleryView: View {
 
     @State private var selected: Generation?
 
-    private let columns = [
+    // Type annoté explicitement : évite au vérificateur de types de résoudre
+    // le littéral de tableau + les surcharges de `GridItem.init` à chaque compilation.
+    private let columns: [GridItem] = [
         GridItem(.flexible(), spacing: 12),
         GridItem(.flexible(), spacing: 12),
     ]

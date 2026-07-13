@@ -49,18 +49,25 @@ struct RemoteImage: View {
 
     // MARK: - Placeholders
 
+    /// Teinte verre du placeholder (constante typée — évite de retyper `Color.white.opacity`
+    /// à chaque rendu et sort le littéral du `ViewBuilder`).
+    private static let placeholderTint: Color = Color.white.opacity(0.28)
+    private static let glyphOpacity: Double = 0.6
+    private static let glyphSize: CGFloat = 20
+    private static let revealDuration: Double = 0.18
+
     private var loadingPlaceholder: some View {
-        Color.white.opacity(0.28)
+        Self.placeholderTint
             .shimmer(active: !reduceMotion)
             .accessibilityHidden(true)
     }
 
     private var failurePlaceholder: some View {
         ZStack {
-            Color.white.opacity(0.28)
+            Self.placeholderTint
             Image(systemName: "photo")
-                .font(.system(size: 20, weight: .regular))
-                .foregroundStyle(Color.inkSoft.opacity(0.6))
+                .font(.system(size: Self.glyphSize, weight: .regular))
+                .foregroundStyle(Color.inkSoft.opacity(Self.glyphOpacity))
         }
         .accessibilityHidden(true)
     }
@@ -85,7 +92,10 @@ struct RemoteImage: View {
         guard !Task.isCancelled else { return }
 
         if let loaded {
-            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.18)) {
+            // Type explicite `Animation?` : la branche `nil` + member-lookup `.easeInOut`
+            // ne force plus le type-checker à remonter la signature de `withAnimation`.
+            let reveal: Animation? = reduceMotion ? nil : .easeInOut(duration: Self.revealDuration)
+            withAnimation(reveal) {
                 image = loaded
             }
         } else {
@@ -155,11 +165,13 @@ actor ImageDiskCache {
 
     /// Nom de fichier stable et sûr, dérivé de l'URL (FNV-1a 64 bits → hex).
     private static func fileName(for url: URL) -> String {
-        let bytes = Array(url.absoluteString.utf8)
-        var hash: UInt64 = 0xcbf2_9ce4_8422_2325            // offset basis
+        let offsetBasis: UInt64 = 0xcbf2_9ce4_8422_2325
+        let prime: UInt64 = 0x0000_0100_0000_01B3
+        let bytes: [UInt8] = Array(url.absoluteString.utf8)
+        var hash: UInt64 = offsetBasis
         for byte in bytes {
             hash ^= UInt64(byte)
-            hash = hash &* 0x0000_0100_0000_01B3            // FNV prime
+            hash = hash &* prime
         }
         return String(format: "%016llx", hash)
     }

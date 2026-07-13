@@ -28,13 +28,16 @@ struct AppHeader: View {
     // MARK: Logo « Create. »
 
     private var logo: some View {
-        (
-            Text("Create").foregroundStyle(Color.ink)
-            + Text(".").foregroundStyle(Color.accent)
-        )
-        .font(Font2.display(26))
-        .accessibilityAddTraits(.isHeader)
-        .accessibilityLabel("Create")
+        // Fragments `Text` hissés et annotés `: Text` : force la surcharge
+        // `Text.foregroundStyle` (retour `Text`) au lieu de la variante générique
+        // `some View`, sinon l'inférence de l'opérateur `+` explose (type-check lent).
+        let display: Font = Font2.display(26)
+        let name: Text = Text("Create").foregroundStyle(Color.ink)
+        let dot: Text = Text(".").foregroundStyle(Color.accent)
+        return (name + dot)
+            .font(display)
+            .accessibilityAddTraits(.isHeader)
+            .accessibilityLabel("Create")
     }
 
     // MARK: Chip crédits (compteur animé)

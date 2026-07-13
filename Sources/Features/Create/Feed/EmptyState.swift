@@ -39,15 +39,21 @@ struct EmptyState: View {
         }
     }
 
+    // Concaténation `Text + Text + Text` : chaque fragment est annoté `: Text`
+    // pour forcer l'overload `Text.foregroundStyle`/`Text.font` (retournant `Text`)
+    // et empêcher le type-checker d'explorer la variante générique `some View`.
+    // Sans ces annotations l'inférence combinatoire de l'opérateur `+` explose.
     private var hero: Text {
-        Text("Qu'est-ce qu'on ")
-            .font(Font2.display(34))
+        let display: Font = Font2.display(34)
+        let lead: Text = Text("Qu'est-ce qu'on ")
+            .font(display)
             .foregroundStyle(Color.ink)
-        + Text("crée")
+        let verb: Text = Text("crée")
             .font(Font2.display(34, italic: true))
             .foregroundStyle(Iris.text)
-        + Text(" aujourd'hui ?")
-            .font(Font2.display(34))
+        let tail: Text = Text(" aujourd'hui ?")
+            .font(display)
             .foregroundStyle(Color.ink)
+        return lead + verb + tail
     }
 }

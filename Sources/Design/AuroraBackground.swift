@@ -42,19 +42,13 @@ struct AuroraBackground: View {
         // on l'exclut du source et on ne garde que le fallback RadialGradient.
         #if compiler(>=6.0)
         if #available(iOS 18, *) {
-            MeshGradient(
-                width: 3, height: 3,
-                points: [
-                    [0, 0],    [0.5, 0],   [1, 0],
-                    [0, 0.5],  [0.5, 0.4], [1, 0.5],
-                    [0, 1],    [0.5, 1],   [1, 1]
-                ],
-                colors: [
-                    .auroraViolet, .auroraSkyLight, .auroraSkyLight,
-                    .auroraBase,   .auroraCyan,     .auroraBlue,
-                    .auroraBase,   .auroraBase,     .auroraCyan
-                ]
-            )
+            // Points/couleurs hoistés en constantes **explicitement typées** (`[SIMD2<Float>]`,
+            // `[Color]`). Le littéral imbriqué `[[0, 0], [0.5, 0], …]` mélangeant entiers et
+            // décimaux forçait le vérificateur de types SwiftUI à résoudre un énorme système de
+            // contraintes (`ExpressibleByArrayLiteral` → `SIMD2<Float>` ×9) : cause classique de
+            // compilation « expression too complex » / build bloqué. Construction explicite = zéro
+            // inférence. Rendu identique.
+            MeshGradient(width: 3, height: 3, points: Self.meshPoints, colors: Self.meshColors)
         } else {
             radialFallback
         }
@@ -62,6 +56,20 @@ struct AuroraBackground: View {
         radialFallback
         #endif
     }
+
+    /// Grille 3×3 des points du mesh (typée explicitement — voir note dans `meshLayer`).
+    private static let meshPoints: [SIMD2<Float>] = [
+        SIMD2<Float>(0.0, 0.0), SIMD2<Float>(0.5, 0.0), SIMD2<Float>(1.0, 0.0),
+        SIMD2<Float>(0.0, 0.5), SIMD2<Float>(0.5, 0.4), SIMD2<Float>(1.0, 0.5),
+        SIMD2<Float>(0.0, 1.0), SIMD2<Float>(0.5, 1.0), SIMD2<Float>(1.0, 1.0)
+    ]
+
+    /// Couleurs des 9 sommets du mesh (foyers pastel), typées explicitement.
+    private static let meshColors: [Color] = [
+        Color.auroraViolet, Color.auroraSkyLight, Color.auroraSkyLight,
+        Color.auroraBase,   Color.auroraCyan,     Color.auroraBlue,
+        Color.auroraBase,   Color.auroraBase,     Color.auroraCyan
+    ]
 
     /// Fallback iOS 17 / SDK < iOS 18 — mêmes foyers reproduits en RadialGradient.
     private var radialFallback: some View {
