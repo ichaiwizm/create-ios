@@ -1,0 +1,1 @@
+Première version de Create ! Génère des images et des vidéos IA avec les meilleurs modèles (Nano Banana Pro, GPT Image, Seedream, Veo, Kling), dicte tes prompts à la voix, suis tes générations en temps réel et reçois une notification dès qu'une création est prête.

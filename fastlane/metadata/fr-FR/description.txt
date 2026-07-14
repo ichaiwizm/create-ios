@@ -1,0 +1,15 @@
+Create est un studio de génération d'images et de vidéos par intelligence artificielle, pensé pour le mobile. Écris un prompt, choisis un modèle, appuie sur Générer : ta création arrive en quelques instants.
+
+Les meilleurs modèles, réunis
+Accède à une sélection de modèles de pointe — Nano Banana Pro, GPT Image, Seedream pour l'image ; Veo et Kling pour la vidéo. Chaque modèle expose ses propres réglages, générés automatiquement : qualité, format, images de référence… tu ne vois que ce qui compte pour le modèle choisi.
+
+Un composer pensé pour le pouce
+Un champ de prompt, un bouton modèle, un bouton Générer. Ajoute des images de référence, dicte ton prompt à la voix, et laisse Create s'occuper du reste. Tes derniers réglages sont mémorisés pour enchaîner les créations sans friction.
+
+Ta galerie, toujours à jour
+Retrouve toutes tes créations dans une galerie fluide. Les générations en cours s'affichent en temps réel avec leur progression, et une notification te prévient dès qu'une création est prête. Ouvre n'importe quelle image ou vidéo en plein écran, réutilise son prompt en un geste.
+
+Beau, rapide, sans distraction
+Une interface claire, une aurore pastel et un accent irisé : Create met tes images au premier plan. Pas de fil d'actualité, pas de bruit — juste toi et ta prochaine idée.
+
+Écris. Génère. Recommence.
